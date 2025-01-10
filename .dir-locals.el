@@ -1,4 +1,7 @@
-((html-mode
+((c-mode
+  (indent-tabs-mode . nil)
+  (tab-width . 4))
+ (html-mode
   (indent-tabs-mode . nil)
   (tab-width . 4))
  (css-mode
