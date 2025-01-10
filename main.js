@@ -1,3 +1,6 @@
+import * as Writer from "./src/writer.js";
+import * as Board from "./src/board.js";
+
 var context = {};
 context.currentTurn = "white";
 
@@ -38,3 +41,16 @@ var board = ChessBoard("board", {
 });
 
 updateTurnIndicator(context.currentTurn);
+
+const memory = new WebAssembly.Memory({ initial: 1 });
+
+WebAssembly.instantiateStreaming(fetch("module.wasm"), {
+    env: {
+        memory: memory,
+        __stack_pointer: new WebAssembly.Global({ value: "i32", mutable: true }, 0)
+    }
+}).then((wasm) => {
+    console.log("[INFO]: WASM module loaded");
+    console.log(wasm);
+    context.wasm = wasm;    
+});
