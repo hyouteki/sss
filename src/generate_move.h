@@ -17,6 +17,14 @@
 
 */
 
+/*
+  IMPORTANT: Assuming the piece actually exists at `src`. Not checking
+             inside `board` because that will be done by the validator.
+*/
+
+BoardPos gen_rank_pos(uchar rank);
+BoardPos gen_wp_move(Board *board, BoardPos src);
+
 BoardPos gen_rank_pos(uchar rank) {
     if (rank > 7) {
         error("gen_rank_pos: rank > 7");
@@ -27,8 +35,22 @@ BoardPos gen_rank_pos(uchar rank) {
     for (uchar i = 0; i < 8; ++i) {
         ret += 1<<(start+i);
     }
-    
     return ret;
+}
+
+BoardPos gen_wp_move(Board *board, BoardPos src) {
+    BoardPos all_moves = 0;
+    // Checking the pawn is at rank 2
+    BoardPos rank2 = gen_rank_pos(2);
+    if (src&rank2) {
+        all_moves = all_moves | gen_rank_pos(4);
+    }
+    all_moves = all_moves | gen_rank_pos(3);
+    // TODO: If a piece is at the third rank it cannot move to fourth rank
+    BoardPos empty = all_moves&(~occupancies(board));
+    // TODO: Handle captures
+    // TODO: Handle un passant
+    return empty;
 }
 
 #endif // SSS_GENERATE_MOVE_H_

@@ -27,4 +27,22 @@ typedef struct Board {
     BitBoard bk_bb;
 } Board;
 
+BoardPos full_board();
+BoardPos occupancies(Board *board);
+
+BoardPos full_board() {
+    BoardPos ret = 0;
+    for (uchar i = 0; i < 64; ++i) {
+        ret += (1<<i);
+    }
+    return ret;
+}
+
+BoardPos occupancies(Board *board) {
+    return board->wp_bb | board->bp_bb | board->wn_bb
+        | board->bn_bb | board->wb_bb | board->bb_bb
+        | board->wr_bb | board->br_bb | board->wq_bb
+        | board->bq_bb | board->wk_bb | board->bk_bb;
+}
+
 #endif // SSS_BOARD_H_

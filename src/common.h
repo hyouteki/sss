@@ -10,7 +10,7 @@ typedef int bool;
 #define false 0
 #define true 1
 
-// Exports
+// Defined in JS
 extern void print(const char *);
 extern void error(const char *);
 
