@@ -1,6 +1,10 @@
 ### Getting Started
+Install the following dependencies
 ```bash
-python3 -m http.server
+sudo apt install clang lld-14 wabt
+```
+```bash
+bash BUILD.sh
 ```
 
 ### Courtesy
