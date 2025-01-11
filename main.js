@@ -1,5 +1,6 @@
-import * as Writer from "./src/writer.js";
-import * as Board from "./src/board.js";
+import * as Writer from "./js/writer.js";
+import * as Board from "./js/board.js";
+import * as Common from "./js/common.js";
 
 var context = {};
 context.currentTurn = "white";
@@ -47,10 +48,17 @@ const memory = new WebAssembly.Memory({ initial: 1 });
 WebAssembly.instantiateStreaming(fetch("module.wasm"), {
     env: {
         memory: memory,
-        __stack_pointer: new WebAssembly.Global({ value: "i32", mutable: true }, 0)
+        __stack_pointer: new WebAssembly.Global({ value: "i32", mutable: true }, 0),
+        print: (textPtr) => {
+            console.log(Common.cstrFromPtr(context.wasm, textPtr));
+        },
+        error: (textPtr) => {
+            console.error(Common.cstrFromPtr(context.wasm, textPtr));
+        },
     }
 }).then((wasm) => {
     console.log("[INFO]: WASM module loaded");
     console.log(wasm);
-    context.wasm = wasm;    
+    context.wasm = wasm;
+    wasm.instance.exports.test();
 });

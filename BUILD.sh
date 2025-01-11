@@ -5,13 +5,14 @@ set -x -e
 
 MODULE_NAME="module"
 WARNS=("all" "extra" "switch-enum")
-EXPORT_SYMBOLS=()
+INCLUDE_DIRS=("./")
+EXPORT_SYMBOLS=("test")
 
 PORT=8000
 
 clang -Os -fno-builtin ${WARNS[@]/#/"-W"} --target=wasm32 \
 	  --no-standard-libraries ${EXPORT_SYMBOLS[@]/#/"-Wl,--export="} \
-	  -Wl,--no-entry -Wl,--allow-undefined \
+	  -Wl,--no-entry -Wl,--allow-undefined ${INCLUDE_DIRS[@]/#/"-I"} \
 	  -o ${MODULE_NAME}.wasm ${MODULE_NAME}.c
 
 wasm2wat ${MODULE_NAME}.wasm > ${MODULE_NAME}.wat
