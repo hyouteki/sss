@@ -1,6 +1,6 @@
-import * as Writer from "./js/writer.js";
-import * as Board from "./js/board.js";
-import * as Common from "./js/common.js";
+import Writer from "./js/writer.js";
+import Board from "./js/board.js";
+import "./js/common.js";
 
 var context = {};
 context.currentTurn = "white";
@@ -24,9 +24,9 @@ function updateTurnIndicator(currentTurn) {
         turnElement.style.backgroundColor = "black";
         turnElement.style.fontStyle = "italic";
     }
+
 }
 
-// Entry point
 var board = ChessBoard("board", {
     draggable: true,
     onDragStart: (source, piece, position, orientation) => {
@@ -40,11 +40,9 @@ var board = ChessBoard("board", {
     },
     position: "start"
 });
-
 updateTurnIndicator(context.currentTurn);
 
 const memory = new WebAssembly.Memory({ initial: 1 });
-
 WebAssembly.instantiateStreaming(fetch("module.wasm"), {
     env: {
         memory: memory,
@@ -60,5 +58,12 @@ WebAssembly.instantiateStreaming(fetch("module.wasm"), {
     console.log("[INFO]: WASM module loaded");
     console.log(wasm);
     context.wasm = wasm;
-    wasm.instance.exports.test();
+    context.writer = new Writer(context.wasm.instance.exports.memory);
+    context.board = new Board(context.writer);
+    entry_point();
 });
+
+function entry_point() {
+    context.wasm.instance.exports.test();
+    console.log(context.board.parseFen(board.fen()));
+}
