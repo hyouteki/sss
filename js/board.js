@@ -6,6 +6,19 @@ class Board {
         this.boardBuffer = new Uint8Array(writer.memory.buffer, this.offset, Board.SIZE);
         this.boardBuffer.fill(0);
         this.boardView = new DataView(this.boardBuffer.buffer);
+        // BitBoard offsets
+        this.wp = 0<<3;
+        this.bp = 1<<3;
+        this.wb = 2<<3;
+        this.bb = 3<<3;
+        this.wn = 4<<3;
+        this.bn = 5<<3;
+        this.wr = 6<<3;
+        this.br = 7<<3;
+        this.wq = 8<<3;
+        this.bq = 9<<3;
+        this.wk = 10<<3;
+        this.bk = 11<<3;
     }
 
     // true for using little-endian by default
@@ -13,53 +26,7 @@ class Board {
         this.boardView.setBigUint64(offset, value, true);
     }
     getBigUint64(offset) {
-        this.boardView.getBigUint64(offset, true);
-    }
-
-    // Getter/Setter for Pawn BitBoards
-    set wp_bb(value) { this.setBigUint64(0, value); }
-    get wp_bb() { return this.getBigUint64(0); }
-    set bp_bb(value) { this.setBigUint64(8, value); }
-    get bp_bb() { return this.getBigUint64(8); }
-    // Getter/Setter for Knight BitBoards    
-    set wn_bb(value) { this.setBigUint64(16, value); }
-    get wn_bb() { return this.getBigUint64(16); }
-    set bn_bb(value) { this.setBigUint64(24, value); }
-    get bn_bb() { return this.getBigUint64(24); }
-    // Getter/Setter for Bishop BitBoards
-    set wb_bb(value) { this.setBigUint64(32, value); }
-    get wb_bb() { return this.getBigUint64(32); }
-    set bb_bb(value) { this.setBigUint64(40, value); }
-    get bb_bb() { return this.getBigUint64(40); }
-    // Getter/Setter for Rook BitBoards
-    set wr_bb(value) { this.setBigUint64(48, value); }
-    get wr_bb() { return this.getBigUint64(48); }
-    set br_bb(value) { this.setBigUint64(56, value); }
-    get br_bb() { return this.getBigUint64(56); }
-    // Getter/Setter for Queen BitBoards
-    set wq_bb(value) { this.setBigUint64(64, value); }
-    get wq_bb() { return this.getBigUint64(64); }
-    set bq_bb(value) { this.setBigUint64(72, value); }
-    get bq_bb() { return this.getBigUint64(72); }
-    // Getter/Setter for King BitBoards
-    set wk_bb(value) { this.setBigUint64(80, value); }
-    get wk_bb() { return this.getBigUint64(80); }
-    set bk_bb(value) { this.setBigUint64(88, value); }
-    get bk_bb() { return this.getBigUint64(88); }
-
-    logBoard() {
-        console.log(`wp_bb: ${this.wp_bb.toString(16)}`);
-        console.log(`bp_bb: ${this.bp_bb.toString(16)}`);
-        console.log(`wn_bb: ${this.wn_bb.toString(16)}`);
-        console.log(`bn_bb: ${this.bn_bb.toString(16)}`);
-        console.log(`wb_bb: ${this.wb_bb.toString(16)}`);
-        console.log(`bb_bb: ${this.bb_bb.toString(16)}`);
-        console.log(`wr_bb: ${this.wr_bb.toString(16)}`);
-        console.log(`br_bb: ${this.br_bb.toString(16)}`);
-        console.log(`wq_bb: ${this.wq_bb.toString(16)}`);
-        console.log(`bq_bb: ${this.bq_bb.toString(16)}`);
-        console.log(`wk_bb: ${this.wk_bb.toString(16)}`);
-        console.log(`bk_bb: ${this.bk_bb.toString(16)}`);
+        return this.boardView.getBigUint64(offset, true);
     }
 
     parseFen(fen) {
@@ -71,41 +38,41 @@ class Board {
                 continue;
             }
             switch (c) {
-            case 'r': // Black rook
-                this.br_bb = BigInt(this.br_bb) | createBigUint64(row, col);
+            case 'p': // Black pawn
+                this.setBigUint64(this.bp, this.getBigUint64(this.bp) | createBigUint64(row, col));
                 break;
             case 'n': // Black knight
-                this.bn_bb |= createBigUint64(row, col);
+                this.setBigUint64(this.bn, this.getBigUint64(this.bn) | createBigUint64(row, col));
                 break;
             case 'b': // Black bishop
-                this.bb_bb |= createBigUint64(row, col);
+                this.setBigUint64(this.bb, this.getBigUint64(this.bb) | createBigUint64(row, col));
+                break;
+            case 'r': // Black rook
+                this.setBigUint64(this.br, this.getBigUint64(this.br) | createBigUint64(row, col));
                 break;
             case 'q': // Black queen
-                this.bq_bb |= createBigUint64(row, col);
+                this.setBigUint64(this.bq, this.getBigUint64(this.bq) | createBigUint64(row, col));
                 break;
             case 'k': // Black king
-                this.bk_bb |= createBigUint64(row, col);
-                break;
-            case 'p': // Black pawn
-                this.bp_bb |= createBigUint64(row, col);
-                break;
-            case 'R': // White rook
-                this.wr_bb |= createBigUint64(row, col);
-                break;
-            case 'N': // White knight
-                this.wn_bb |= createBigUint64(row, col);
-                break;
-            case 'B': // White bishop
-                this.wb_bb |= createBigUint64(row, col);
-                break;
-            case 'Q': // White queen
-                this.wq_bb |= createBigUint64(row, col);
-                break;
-            case 'K': // White king
-                this.wk_bb |= createBigUint64(row, col);
+                this.setBigUint64(this.bk, this.getBigUint64(this.bk) | createBigUint64(row, col));
                 break;
             case 'P': // White pawn
-                this.wp_bb |= createBigUint64(row, col);
+                this.setBigUint64(this.wp, this.getBigUint64(this.wp) | createBigUint64(row, col));
+                break;
+            case 'N': // White knight
+                this.setBigUint64(this.wn, this.getBigUint64(this.wn) | createBigUint64(row, col));
+                break;
+            case 'B': // White bishop
+                this.setBigUint64(this.wb, this.getBigUint64(this.wb) | createBigUint64(row, col));
+                break;
+            case 'R': // White rook
+                this.setBigUint64(this.wr, this.getBigUint64(this.wr) | createBigUint64(row, col));
+                break;
+            case 'Q': // White queen
+                this.setBigUint64(this.wq, this.getBigUint64(this.wq) | createBigUint64(row, col));
+                break;
+            case 'K': // White king
+                this.setBigUint64(this.wk, this.getBigUint64(this.wk) | createBigUint64(row, col));
                 break;
             case '/': // End of row
                 row += 1;

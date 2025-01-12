@@ -65,5 +65,4 @@ WebAssembly.instantiateStreaming(fetch("module.wasm"), {
 
 function entry_point() {
     context.wasm.instance.exports.test();
-    console.log(context.board.parseFen(board.fen()));
 }
