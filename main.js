@@ -38,6 +38,9 @@ var board = ChessBoard("board", {
         context.currentTurn = (context.currentTurn === "white")? "black": "white";
         updateTurnIndicator(context.currentTurn);
     },
+    onChange: (oldPos, newPos) => {
+        context.board.setFen(board.fen());
+    },
     position: "start"
 });
 updateTurnIndicator(context.currentTurn);

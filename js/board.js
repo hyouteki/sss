@@ -4,7 +4,6 @@ class Board {
         // Initialize the memory buffer and data view for the board
         this.offset = writer.reserve(Board.SIZE);
         this.boardBuffer = new Uint8Array(writer.memory.buffer, this.offset, Board.SIZE);
-        this.boardBuffer.fill(0);
         this.boardView = new DataView(this.boardBuffer.buffer);
         // BitBoard offsets
         this.wp = 0<<3;
@@ -29,7 +28,8 @@ class Board {
         return this.boardView.getBigUint64(offset, true);
     }
 
-    parseFen(fen) {
+    setFen(fen) {
+        this.boardBuffer.fill(0);
         let row = 0;
         let col = 0;
         for (let c of fen) {
@@ -77,12 +77,52 @@ class Board {
             case '/': // End of row
                 row += 1;
                 col = 0;
-                break;
+                continue;
             default:
                 console.log(`Invalid character in FEN: ${c}`);
             }
             col += 1;
         }
+    }
+
+    getFen() {
+        const symbolTable = {
+            [this.wp]: 'P', [this.bp]: 'p',
+            [this.wn]: 'N', [this.bn]: 'n',
+            [this.wb]: 'B', [this.bb]: 'b',
+            [this.wr]: 'R', [this.br]: 'r',
+            [this.wq]: 'Q', [this.bq]: 'q',
+            [this.wk]: 'K', [this.bk]: 'k',
+        };
+        let fen = "";
+        for (let row = 0; row < 8; row++) {
+            let empty = 0;
+            for (let col = 0; col < 8; col++) {
+                let pieceFound = false;
+                for (const [offset, symbol] of Object.entries(symbolTable)) {
+                    const bitboard = this.getBigUint64(parseInt(offset));
+                    if (bitboard & createBigUint64(row, col)) {
+                        if (empty > 0) {
+                            fen += empty;
+                            empty = 0;
+                        }
+                        fen += symbol;
+                        pieceFound = true;
+                        break;
+                    }
+                }
+                if (!pieceFound) {
+                    empty++;
+                }
+            }
+            if (empty > 0) {
+                fen += empty;
+            }
+            if (row < 7) {
+                fen += '/';
+            }
+        }
+        return fen;
     }
 }
 
