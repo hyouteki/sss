@@ -30,6 +30,14 @@ class Board {
 
     setFen(fen) {
         this.boardBuffer.fill(0);
+        const symbolTable = {
+            'P': this.wp, 'p': this.bp,
+            'N': this.wn, 'n': this.bn,
+            'B': this.wb, 'b': this.bb,
+            'R': this.wr, 'r': this.br,
+            'Q': this.wq, 'q': this.bq,
+            'K': this.wk, 'k': this.bk,
+        };
         let row = 0;
         let col = 0;
         for (let c of fen) {
@@ -37,50 +45,15 @@ class Board {
                 col += parseInt(c, 10);
                 continue;
             }
-            switch (c) {
-            case 'p': // Black pawn
-                this.setBigUint64(this.bp, this.getBigUint64(this.bp) | createBigUint64(row, col));
-                break;
-            case 'n': // Black knight
-                this.setBigUint64(this.bn, this.getBigUint64(this.bn) | createBigUint64(row, col));
-                break;
-            case 'b': // Black bishop
-                this.setBigUint64(this.bb, this.getBigUint64(this.bb) | createBigUint64(row, col));
-                break;
-            case 'r': // Black rook
-                this.setBigUint64(this.br, this.getBigUint64(this.br) | createBigUint64(row, col));
-                break;
-            case 'q': // Black queen
-                this.setBigUint64(this.bq, this.getBigUint64(this.bq) | createBigUint64(row, col));
-                break;
-            case 'k': // Black king
-                this.setBigUint64(this.bk, this.getBigUint64(this.bk) | createBigUint64(row, col));
-                break;
-            case 'P': // White pawn
-                this.setBigUint64(this.wp, this.getBigUint64(this.wp) | createBigUint64(row, col));
-                break;
-            case 'N': // White knight
-                this.setBigUint64(this.wn, this.getBigUint64(this.wn) | createBigUint64(row, col));
-                break;
-            case 'B': // White bishop
-                this.setBigUint64(this.wb, this.getBigUint64(this.wb) | createBigUint64(row, col));
-                break;
-            case 'R': // White rook
-                this.setBigUint64(this.wr, this.getBigUint64(this.wr) | createBigUint64(row, col));
-                break;
-            case 'Q': // White queen
-                this.setBigUint64(this.wq, this.getBigUint64(this.wq) | createBigUint64(row, col));
-                break;
-            case 'K': // White king
-                this.setBigUint64(this.wk, this.getBigUint64(this.wk) | createBigUint64(row, col));
-                break;
-            case '/': // End of row
+            if (c === '/') {
                 row += 1;
                 col = 0;
                 continue;
-            default:
-                console.log(`Invalid character in FEN: ${c}`);
             }
+            // TODO: Check for c not being present in the symbolTable
+            //       a.k.a. incorrect FEN
+            this.setBigUint64(symbolTable[c], this.getBigUint64(symbolTable[c])
+                              | createBigUint64(row, col));
             col += 1;
         }
     }
