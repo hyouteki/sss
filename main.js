@@ -1,9 +1,10 @@
 import Writer from "./js/writer.js";
-import Board from "./js/board.js";
+import * as BoardModule from "./js/board.js";
 import "./js/common.js";
 
 var context = {};
 context.currentTurn = "white";
+var board = null;
 
 var config = {
 	draggable: true,
@@ -27,24 +28,6 @@ function updateTurnIndicator(currentTurn) {
 
 }
 
-var board = ChessBoard("board", {
-    draggable: true,
-    onDragStart: (source, piece, position, orientation) => {
-        return ((!(context.currentTurn === "white" && piece.startsWith("b"))) &&
-                (!(context.currentTurn === "black" && piece.startsWith("w"))));
-    },
-    onDrop: (source, target, piece) => {
-        if (source === target) return "snapback";
-        context.currentTurn = (context.currentTurn === "white")? "black": "white";
-        updateTurnIndicator(context.currentTurn);
-    },
-    onChange: (oldPos, newPos) => {
-        context.board.setFen(board.fen());
-    },
-    position: "start"
-});
-updateTurnIndicator(context.currentTurn);
-
 const memory = new WebAssembly.Memory({ initial: 1 });
 WebAssembly.instantiateStreaming(fetch("module.wasm"), {
     env: {
@@ -62,10 +45,37 @@ WebAssembly.instantiateStreaming(fetch("module.wasm"), {
     console.log(wasm);
     context.wasm = wasm;
     context.writer = new Writer(context.wasm.instance.exports.memory);
-    context.board = new Board(context.writer);
-    entry_point();
+    context.board = new BoardModule.Board(context.writer);
+    setupBoard();
+    entryPoint();
 });
 
-function entry_point() {
+function setupBoard() {
+    board = ChessBoard("board", {
+        draggable: true,
+        onDragStart: (source, piece, position, orientation) => {
+            if (piece === "wP") {
+                const result = context.wasm.instance.exports.gen_wp_move(context.board, BoardModule.squareToBigUint64(source));
+                const unsignedResult = BigInt.asUintN(64, result);
+                console.log(unsignedResult.toString());
+            }
+            return ((!(context.currentTurn === "white" && piece.startsWith("b"))) &&
+                    (!(context.currentTurn === "black" && piece.startsWith("w"))));
+        },
+        onDrop: (source, target, piece) => {
+            if (source === target) return "snapback";
+            context.currentTurn = (context.currentTurn === "white")? "black": "white";
+            updateTurnIndicator(context.currentTurn);
+        },
+        onChange: (oldPos, newPos) => {
+            context.board.setFen(board.fen());
+        },
+        position: "start"
+    });
+    updateTurnIndicator(context.currentTurn);
+    context.board.setFen(board.fen());
+}
+
+function entryPoint() {
     context.wasm.instance.exports.test();
 }

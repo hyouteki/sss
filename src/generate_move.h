@@ -50,7 +50,8 @@ BoardPos gen_wp_move(Board *board, BoardPos src) {
     BoardPos empty = all_moves&(~occupancies(board));
     // TODO: Handle captures
     // TODO: Handle un passant
-    return empty;
+    (void) empty;
+    return occupancies(board);
 }
 
 #endif // SSS_GENERATE_MOVE_H_

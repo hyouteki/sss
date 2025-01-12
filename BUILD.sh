@@ -6,7 +6,7 @@ set -x -e
 MODULE_NAME="module"
 WARNS=("all" "extra" "switch-enum")
 INCLUDE_DIRS=("./")
-EXPORT_SYMBOLS=("test")
+EXPORT_SYMBOLS=("test", "gen_wp_move")
 
 PORT=8000
 

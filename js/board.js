@@ -1,4 +1,4 @@
-class Board {
+export class Board {
     static SIZE = 8 * 12; // sizeof(uint64_t) * 12 BitBoards
     constructor(writer) {
         // Initialize the memory buffer and data view for the board
@@ -104,5 +104,8 @@ export function createBigUint64(row, col) {
     return 1n << BigInt(bitPosition);
 }
 
-
-export default Board;
+export function squareToBigUint64(sq) {
+    const col = sq.charCodeAt(0) - 'a'.charCodeAt(0);
+    const row = parseInt(sq[1], 10) - 1;
+    return createBigUint64(row, col);
+}
